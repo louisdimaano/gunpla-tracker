@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>My Kits</h1>
+
+{% if kits %}
+<div class="kit-grid">
+    {% for kit in kits %}
+    <article class="card kit-card">
+        <div class="kit-top">
+            <h2>{{ kit.name }}</h2>
+            <span class="tag">{{ kit.grade }}{% if kit.kit_number %} {{ kit.kit_number }}{% endif %}</span>
+        </div>
+        {% if kit.series %}<p class="muted">{{ kit.series }}</p>{% endif %}
+        <p><strong>{{ kit.status }}</strong>
+            {% if kit.finished_on %}<span class="muted small">on {{ kit.finished_on }}</span>{% endif %}</p>
+        {% if kit.difficulty or kit.build_quality %}
+        <p class="small">
+            {% if kit.difficulty %}Difficulty {{ kit.difficulty }}/5{% endif %}
+            {% if kit.difficulty and kit.build_quality %} | {% endif %}
+            {% if kit.build_quality %}Build quality {{ kit.build_quality }}/5{% endif %}
+        </p>
+        {% endif %}
+        {% if kit.notes %}<p class="small muted">{{ kit.notes }}</p>{% endif %}
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <p>No kits yet. <a href="{{ url_for('add_kit') }}">Add your first one.</a></p>
+</div>
+{% endif %}
+{% endblock %}

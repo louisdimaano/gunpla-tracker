@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Gunpla Tracker{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a class="site-name" href="{{ url_for('kit_list') }}">Gunpla Tracker</a>
+            <nav>
+                <a href="{{ url_for('kit_list') }}" {% if request.endpoint=='kit_list' %}aria-current="page" {% endif
+                    %}>Kits</a>
+                <a href="{{ url_for('add_kit') }}" {% if request.endpoint=='add_kit' %}aria-current="page" {% endif
+                    %}>Add kit</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+</html>

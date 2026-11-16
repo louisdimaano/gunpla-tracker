@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}{{ heading }} | Gunpla Tracker{% endblock %}
+
+{% block content %}
+<h1>{{ heading }}</h1>
+
+{% if errors %}
+<div class="errors">
+    {% for error in errors %}
+    <p>{{ error }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" class="card">
+    <p class="field"><label>Kit name
+            <input name="name" value="{{ form.get('name') or '' }}" required placeholder="e.g. Gundam Exia"></label></p>
+
+    <div class="row">
+        <p class="field"><label>Grade
+                <select name="grade">
+                    {% for g in grades %}
+                    <option value="{{ g }}" {% if form.get('grade')==g %}selected{% endif %}>{{ g }}</option>
+                    {% endfor %}
+                </select></label></p>
+        <p class="field"><label>Kit number (optional)
+                <input type="number" name="kit_number" min="1" step="1" value="{{ form.get('kit_number') or '' }}"
+                    placeholder="e.g. 15"></label></p>
+    </div>
+
+    <p class="field"><label>Series or line (optional)
+            <input name="series" value="{{ form.get('series') or '' }}"
+                placeholder="e.g. HG Gundam 00, MG Ver.Ka"></label></p>
+
+    <div class="row">
+        <p class="field"><label>Status
+                <select name="status">
+                    {% for s in statuses %}
+                    <option value="{{ s }}" {% if form.get('status')==s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select></label></p>
+        <p class="field"><label>Finished date
+                <input type="date" name="finished_on" value="{{ form.get('finished_on') or '' }}"></label></p>
+    </div>
+    <p class="muted small">Leave the date blank and it fills in today when you mark a kit Built or Painted.
+        Type a date to backfill an older build.</p>
+
+    <div class="row">
+        <p class="field"><label>Difficulty (optional)
+                <select name="difficulty">
+                    <option value="">Not rated</option>
+                    {% for r in ratings %}
+                    <option value="{{ r }}" {% if form.get('difficulty') | string==r | string %}selected{% endif %}>{{ r
+                        }}</option>
+                    {% endfor %}
+                </select></label></p>
+        <p class="field"><label>Build quality (optional)
+                <select name="build_quality">
+                    <option value="">Not rated</option>
+                    {% for r in ratings %}
+                    <option value="{{ r }}" {% if form.get('build_quality') | string==r | string %}selected{% endif %}>
+                        {{ r }}</option>
+                    {% endfor %}
+                </select></label></p>
+    </div>
+
+    <p class="field"><label>Notes (optional)
+            <textarea name="notes"
+                placeholder="e.g. Parts fall apart, use glue on the hips">{{ form.get('notes') or '' }}</textarea></label>
+    </p>
+
+    <div class="form-actions">
+        <button class="btn" type="submit">Save</button>
+        <a class="btn btn-secondary" href="{{ url_for('kit_list') }}">Cancel</a>
+    </div>
+</form>
+{% endblock %}
