@@ -1,7 +1,7 @@
 import os
 from datetime import date
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, abort
 
 from db import get_db, init_db
 from kits import GRADES, STATUSES, read_kit_form, decide_finished_on, sort_kits
@@ -17,6 +17,15 @@ def show_kit_form(heading, form, errors, kit_id=None):
     """Show the Add or Edit form, with any errors at the top."""
     return render_template("kit_form.html", heading=heading, form=form, errors=errors,
                            kit_id=kit_id, grades=GRADES, statuses=STATUSES, ratings=RATINGS)
+
+
+def get_kit_or_404(conn, kit_id):
+    """Find one kit by id, or show a Not Found page."""
+    kit = conn.execute("SELECT * FROM kits WHERE id = ?", (kit_id,)).fetchone()
+    if kit is None:
+        conn.close()
+        abort(404)
+    return kit
 
 
 @app.route("/")
@@ -50,6 +59,45 @@ def add_kit():
     conn.close()
     return redirect(url_for("kit_list"))
 
+
+@app.route("/kits/<int:kit_id>/edit", methods=["GET", "POST"])
+def edit_kit(kit_id):
+    conn = get_db()
+    saved = get_kit_or_404(conn, kit_id)
+
+    if request.method == "GET":
+        conn.close()
+        return show_kit_form("Edit Kit", dict(saved), [], kit_id)
+
+    values, errors = read_kit_form(request.form)
+    if errors:
+        conn.close()
+        return show_kit_form("Edit Kit", request.form, errors, kit_id)
+
+    values["finished_on"] = decide_finished_on(
+        saved["status"], values["status"], saved["finished_on"], values["finished_on"], date.today()
+    )
+    values["id"] = kit_id
+    conn.execute(
+        "UPDATE kits SET name = :name, grade = :grade, series = :series, "
+        "kit_number = :kit_number, status = :status, difficulty = :difficulty, "
+        "build_quality = :build_quality, finished_on = :finished_on, notes = :notes "
+        "WHERE id = :id",
+        values,
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for("kit_list"))
+
+
+@app.route("/kits/<int:kit_id>/delete", methods=["POST"])
+def delete_kit(kit_id):
+    conn = get_db()
+    get_kit_or_404(conn, kit_id)
+    conn.execute("DELETE FROM kits WHERE id = ?", (kit_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("kit_list"))
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

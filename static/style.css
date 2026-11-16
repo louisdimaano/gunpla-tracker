@@ -22,3 +22,8 @@
     align-items: flex-start;
     gap: 8px;
 }
+
+.kit-card .btn {
+    margin-top: auto;
+    align-self: flex-start;
+}

@@ -75,4 +75,11 @@
         <a class="btn btn-secondary" href="{{ url_for('kit_list') }}">Cancel</a>
     </div>
 </form>
+
+{% if kit_id %}
+<form method="post" action="{{ url_for('delete_kit', kit_id=kit_id) }}"
+    onsubmit="return confirm('Delete this kit for good?');">
+    <button class="btn btn-danger" type="submit">Delete kit</button>
+</form>
+{% endif %}
 {% endblock %}
