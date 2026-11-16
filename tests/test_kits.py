@@ -1,5 +1,5 @@
 from datetime import date
-from kits import read_kit_form, decide_finished_on
+from kits import read_kit_form, decide_finished_on, sort_kits
 
 TODAY = date(2026, 11, 16)
 
@@ -75,3 +75,43 @@ def test_same_status_keeps_its_date():
 
 def test_unfinished_status_clears_date():
     assert decide_finished_on("Built", "Not Started", "2026-01-10", "2026-01-10", TODAY) is None
+    
+
+def kit(name, grade="HG", series=None, kit_number=None, status="Not Started"):
+    return {"name": name, "grade": grade, "series": series,
+            "kit_number": kit_number, "status": status}
+
+
+def names(kits):
+    return [k["name"] for k in kits]
+
+
+def test_name_sort_ignores_case():
+    kits = [kit("zaku"), kit("Exia"), kit("barbatos")]
+    assert names(sort_kits(kits, "name")) == ["barbatos", "Exia", "zaku"]
+
+
+def test_grade_sort_follows_grade_list():
+    kits = [kit("A", grade="MG"), kit("B", grade="HG"), kit("C", grade="RG")]
+    assert names(sort_kits(kits, "grade")) == ["B", "C", "A"]
+
+
+def test_number_sort_puts_unnumbered_last():
+    kits = [kit("A", grade="RG", kit_number=15), kit("B", grade="RG"),
+            kit("C", grade="RG", kit_number=3)]
+    assert names(sort_kits(kits, "number")) == ["C", "A", "B"]
+
+
+def test_series_sort_puts_blank_series_last():
+    kits = [kit("A"), kit("B", series="Gundam 00"), kit("C", series="Build Fighters")]
+    assert names(sort_kits(kits, "series")) == ["C", "B", "A"]
+
+
+def test_status_sort_follows_status_list():
+    kits = [kit("A", status="Painted"), kit("B", status="Not Started"), kit("C", status="Built")]
+    assert names(sort_kits(kits, "status")) == ["B", "C", "A"]
+
+
+def test_unknown_sort_falls_back_to_name():
+    kits = [kit("Zaku"), kit("Exia")]
+    assert names(sort_kits(kits, "price")) == ["Exia", "Zaku"]

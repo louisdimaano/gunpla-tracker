@@ -75,3 +75,37 @@ def decide_finished_on(old_status, new_status, old_date, submitted_date, today):
     if new_status != old_status and submitted_date == old_date:
         return today.isoformat()
     return submitted_date
+
+
+SORT_OPTIONS = ("name", "grade", "series", "number", "status")
+
+
+def position(value, choices):
+    """Where a value sits in a list of choices. Unknown values go last."""
+    if value in choices:
+        return choices.index(value)
+    return len(choices)
+
+
+def last_if_missing(value):
+    """Sort key piece that puts missing values (None) after real ones."""
+    return (value is None, value)
+
+
+def sort_kits(kits, sort_by):
+    """Return the kits in the order picked on the list page."""
+
+    def sort_key(kit):
+        name = kit["name"].casefold()
+        if sort_by == "grade":
+            return (position(kit["grade"], GRADES), name)
+        if sort_by == "series":
+            series = kit["series"].casefold() if kit["series"] else None
+            return (last_if_missing(series), name)
+        if sort_by == "number":
+            return (position(kit["grade"], GRADES), last_if_missing(kit["kit_number"]), name)
+        if sort_by == "status":
+            return (position(kit["status"], STATUSES), name)
+        return (name,)
+
+    return sorted(kits, key=sort_key)
