@@ -26,7 +26,6 @@
             {% for s in statuses[1:] %}<span{% if loop.index <= step %} class="done"{% endif %}></span>{% endfor %}
         </div>
         <p class="small"><strong>{{ kit.status }}</strong>{% if kit.finished_on %} on {{ kit.finished_on }}{% endif %}</p>
-            {% if kit.finished_on %}<span class="muted small">on {{ kit.finished_on }}</span>{% endif %}</p>
         {% if kit.difficulty or kit.build_quality %}
         <p class="small">
             {% if kit.difficulty %}Difficulty {{ kit.difficulty }}/5{% endif %}
