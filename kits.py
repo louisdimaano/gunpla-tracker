@@ -77,7 +77,13 @@ def decide_finished_on(old_status, new_status, old_date, submitted_date, today):
     return submitted_date
 
 
-SORT_OPTIONS = ("name", "grade", "series", "number", "status")
+SORT_OPTIONS = {
+    "name": "Name",
+    "grade": "Grade",
+    "series": "Series",
+    "number": "Kit number",
+    "status": "Status",
+}
 
 
 def position(value, choices):

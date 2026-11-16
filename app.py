@@ -4,7 +4,8 @@ from datetime import date
 from flask import Flask, render_template, request, redirect, url_for, abort
 
 from db import get_db, init_db
-from kits import GRADES, STATUSES, read_kit_form, decide_finished_on, sort_kits
+from kits import GRADES, STATUSES, SORT_OPTIONS, read_kit_form, decide_finished_on, sort_kits
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-not-secret")
@@ -15,9 +16,19 @@ RATINGS = [1, 2, 3, 4, 5]
 
 def show_kit_form(heading, form, errors, kit_id=None):
     """Show the Add or Edit form, with any errors at the top."""
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT DISTINCT series FROM kits WHERE series IS NOT NULL ORDER BY series COLLATE NOCASE"
+    ).fetchall()
+    conn.close()
+    series_options = [row["series"] for row in rows]
     return render_template("kit_form.html", heading=heading, form=form, errors=errors,
-                           kit_id=kit_id, grades=GRADES, statuses=STATUSES, ratings=RATINGS)
+                           kit_id=kit_id, grades=GRADES, statuses=STATUSES, ratings=RATINGS,
+                           series_options=series_options)
 
+def escape_like(text):
+    """Make %, _ and \\ in search text match literally in a SQL LIKE search."""
+    return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 def get_kit_or_404(conn, kit_id):
     """Find one kit by id, or show a Not Found page."""
@@ -30,11 +41,21 @@ def get_kit_or_404(conn, kit_id):
 
 @app.route("/")
 def kit_list():
-    conn = get_db()
-    kits = conn.execute("SELECT * FROM kits").fetchall()
-    conn.close()
-    return render_template("kits.html", kits=sort_kits(kits, "name"))
+    search = request.args.get("q", "").strip()
+    sort_by = request.args.get("sort", "name")
 
+    conn = get_db()
+    if search:
+        kits = conn.execute(
+            "SELECT * FROM kits WHERE name LIKE ? ESCAPE '\\'",
+            (f"%{escape_like(search)}%",),
+        ).fetchall()
+    else:
+        kits = conn.execute("SELECT * FROM kits").fetchall()
+    conn.close()
+
+    return render_template("kits.html", kits=sort_kits(kits, sort_by), search=search,
+                           sort_by=sort_by, sort_options=SORT_OPTIONS, statuses=STATUSES)
 
 @app.route("/kits/new", methods=["GET", "POST"])
 def add_kit():

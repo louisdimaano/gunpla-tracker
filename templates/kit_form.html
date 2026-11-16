@@ -30,8 +30,13 @@
     </div>
 
     <p class="field"><label>Series or line (optional)
-            <input name="series" value="{{ form.get('series') or '' }}"
+            <input name="series" list="series-options" autocomplete="off" value="{{ form.get('series') or '' }}"
                 placeholder="e.g. HG Gundam 00, MG Ver.Ka"></label></p>
+    <datalist id="series-options">
+        {% for s in series_options %}
+        <option value="{{ s }}">
+            {% endfor %}
+    </datalist>
 
     <div class="row">
         <p class="field"><label>Status
@@ -43,7 +48,7 @@
         <p class="field"><label>Finished date
                 <input type="date" name="finished_on" value="{{ form.get('finished_on') or '' }}"></label></p>
     </div>
-    <p class="muted small">Leave the date blank and it fills in today when you mark a kit Built or Painted.
+    <p class="hint muted small">Leave the date blank
         Type a date to backfill an older build.</p>
 
     <div class="row">
@@ -77,7 +82,7 @@
 </form>
 
 {% if kit_id %}
-<form method="post" action="{{ url_for('delete_kit', kit_id=kit_id) }}"
+<form method="post" class="delete-form" action="{{ url_for('delete_kit', kit_id=kit_id) }}"
     onsubmit="return confirm('Delete this kit for good?');">
     <button class="btn btn-danger" type="submit">Delete kit</button>
 </form>

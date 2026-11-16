@@ -1,29 +1,358 @@
-/* Kit cards */
+/* Gunpla Tracker styles
+   RX-78 colors: white, blue, red, and yellow.
+   Every color is set once here, then used by name everywhere below. */
+:root {
+    --paper: #dfe3ea;
+    /* page background */
+    --panel: #ffffff;
+    /* cards and forms */
+    --panel-top: #ffffff;
+    /* top corner of each card (lighter in dark mode) */
+    --frame: #c9cfd8;
+    /* input borders */
+    --line: #d3d8e0;
+    /* empty progress bars */
+    --ink: #18213a;
+    /* main text */
+    --ink-soft: #586379;
+    /* secondary text */
+    --blue: #1d4e9e;
+    --blue-soft: #dfe8f7;
+    --on-blue: #ffffff;
+    /* text on blue */
+    --red: #d2232a;
+    --red-soft: #fbe3e3;
+    --on-red: #ffffff;
+    --yellow: #f5c400;
+    --header: #1d4e9e;
+    --field: #ffffff;
+    /* inside of text boxes */
+    color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --paper: #111a33;
+        --panel: #1b2649;
+        --panel-top: #22305a;
+        --frame: #33427a;
+        --line: #2a3760;
+        --ink: #f4f6fb;
+        --ink-soft: #a7b2d0;
+        --blue: #3a78e6;
+        --blue-soft: #22356a;
+        --red: #e3262f;
+        --red-soft: #4a1f2b;
+        --yellow: #ffcc00;
+        --header: #0b1226;
+        --field: #0f1730;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Barlow", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    background: var(--paper);
+    color: var(--ink);
+}
+
+:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Bold slanted titles, like the type on a kit box */
+.site-name,
+h1,
+.kit-card h2,
+.tag {
+    font-family: "Barlow Condensed", sans-serif;
+    font-style: italic;
+    font-weight: 800;
+}
+
+/* Header with kit-box stripes on the right */
+.site-header {
+    background:
+        linear-gradient(115deg,
+            transparent 66%,
+            var(--red) 66%, var(--red) 73%,
+            #ffffff 73%, #ffffff 76%,
+            var(--yellow) 76%, var(--yellow) 81%,
+            transparent 81%),
+        var(--header);
+}
+
+.site-header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+}
+
+.site-name {
+    font-size: 26px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+nav {
+    display: flex;
+    gap: 4px;
+}
+
+nav a {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: var(--header);
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+nav a[aria-current="page"] {
+    background: var(--yellow);
+    color: #0b1226;
+}
+
+/* Page layout and text */
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+h1 {
+    margin: 0 0 16px;
+    font-size: 46px;
+    line-height: 1.05;
+    text-transform: uppercase;
+}
+
+.muted {
+    color: var(--ink-soft);
+}
+
+.small {
+    font-size: 14px;
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.card> :first-child {
+    margin-top: 0;
+}
+
+.card> :last-child {
+    margin-bottom: 0;
+}
+
+/* Kit cards, shaped like armor plates with two cut corners */
 .kit-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 16px;
 }
 
 .kit-card {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 0;
+    gap: 4px;
+    padding: 16px 18px 16px 16px;
+    border-left: 8px solid var(--blue);
+    background: linear-gradient(160deg, var(--panel-top) 0%, var(--panel) 55%);
+    clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+}
+
+.kit-card.is-painted {
+    border-left-color: var(--yellow);
 }
 
 .kit-card p {
     margin: 0;
 }
 
-.kit-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 8px;
+.kit-card h2 {
+    margin: 0;
+    font-size: 30px;
+    line-height: 1.1;
+}
+
+.tag {
+    align-self: flex-start;
+    padding: 0 14px 0 8px;
+    background: var(--red);
+    color: #ffffff;
+    font-size: 18px;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
 
 .kit-card .btn {
     margin-top: auto;
     align-self: flex-start;
+    padding: 6px 14px;
+    font-size: 14px;
+}
+
+/* Build progress: one bar each for Snapped Fit, Built, and Painted */
+.progress {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    padding-left: 4px;
+}
+
+.progress span {
+    flex: 1;
+    height: 8px;
+    background: var(--line);
+    transform: skewX(-30deg);
+}
+
+.progress .done {
+    background: var(--blue);
+}
+
+.is-painted .progress .done {
+    background: var(--yellow);
+}
+
+/* Search and sort bar */
+.search-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    flex: 1 1 200px;
+    margin-top: 0;
+}
+
+.search-bar select {
+    flex: 0 1 auto;
+    width: auto;
+    margin-top: 0;
+}
+
+/* Buttons, with cut corners to match the cards */
+.btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border: 0;
+    background: var(--blue);
+    color: var(--on-blue);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}
+
+.btn-secondary {
+    background: var(--blue-soft);
+    color: var(--ink);
+}
+
+.btn-danger {
+    background: var(--red);
+    color: var(--on-red);
+}
+
+/* Forms */
+.field {
+    margin: 0 0 16px;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+input,
+select,
+textarea {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px 12px;
+    font: inherit;
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--frame);
+    border-radius: 0;
+}
+
+textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-soft);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 520px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hint {
+    margin: -8px 0 16px;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.delete-form {
+    margin-top: 8px;
+}
+
+/* Error messages */
+.errors {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border-left: 4px solid var(--red);
+    background: var(--red-soft);
+}
+
+.errors p {
+    margin: 0;
 }

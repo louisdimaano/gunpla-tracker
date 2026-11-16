@@ -62,3 +62,51 @@ def test_missing_kit_is_not_found(client):
     assert client.get("/kits/999/edit").status_code == 404
     assert client.post("/kits/999/edit", data=FORM).status_code == 404
     assert client.post("/kits/999/delete").status_code == 404
+
+
+def test_search_matches_part_of_name_ignoring_case(client):
+    add_kit(client, name="Gundam Exia")
+    add_kit(client, name="Zaku II")
+    page = client.get("/?q=exia").data
+    assert b"Gundam Exia" in page
+    assert b"Zaku II" not in page
+
+
+def test_search_treats_percent_and_underscore_literally(client):
+    add_kit(client, name="100% Exia")
+    add_kit(client, name="Zaku_II")
+    add_kit(client, name="Barbatos")
+    page = client.get("/?q=%25").data
+    assert b"100% Exia" in page
+    assert b"Barbatos" not in page
+    page = client.get("/?q=_").data
+    assert b"Zaku_II" in page
+    assert b"Barbatos" not in page
+
+
+def test_search_with_apostrophe_works(client):
+    add_kit(client, name="Zeta's Return")
+    add_kit(client, name="Zaku II")
+    page = client.get("/?q=zeta's").data
+    assert b"Zeta&#39;s Return" in page
+    assert b"Zaku II" not in page
+
+
+def test_search_with_no_match_says_so(client):
+    add_kit(client)
+    assert b"No kits match" in client.get("/?q=nothing").data
+
+
+def test_sort_by_grade_orders_list(client):
+    add_kit(client, name="Alpha", grade="MG")
+    add_kit(client, name="Zulu", grade="HG")
+    page = client.get("/?sort=grade").data
+    assert page.index(b"Zulu") < page.index(b"Alpha")
+
+
+def test_form_suggests_existing_series(client):
+    add_kit(client, series="HG Gundam 00")
+    assert b'<option value="HG Gundam 00">' in client.get("/kits/new").data
+
+
+    

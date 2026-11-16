@@ -3,16 +3,29 @@
 {% block content %}
 <h1>My Kits</h1>
 
+<form method="get" class="search-bar">
+    <input type="search" name="q" value="{{ search }}" placeholder="Search kit names" aria-label="Search kit names">
+    <select name="sort" aria-label="Sort by" onchange="this.form.submit()">
+        {% for key, label in sort_options.items() %}
+        <option value="{{ key }}" {% if sort_by==key %}selected{% endif %}>Sort: {{ label }}</option>
+        {% endfor %}
+    </select>
+    <button class="btn" type="submit">Search</button>
+    {% if search %}<a class="btn btn-secondary" href="{{ url_for('kit_list', sort=sort_by) }}">Clear</a>{% endif %}
+</form>
+
 {% if kits %}
 <div class="kit-grid">
     {% for kit in kits %}
-    <article class="card kit-card">
-        <div class="kit-top">
-            <h2>{{ kit.name }}</h2>
-            <span class="tag">{{ kit.grade }}{% if kit.kit_number %} {{ kit.kit_number }}{% endif %}</span>
-        </div>
+        {% set step = statuses.index(kit.status) if kit.status in statuses else 0 %}
+    <article class="kit-card{% if kit.status == 'Painted' %} is-painted{% endif %}">
+        <span class="tag">{{ kit.grade }}{% if kit.kit_number %} {{ kit.kit_number }}{% endif %}</span>
+        <h2>{{ kit.name }}</h2>
         {% if kit.series %}<p class="muted">{{ kit.series }}</p>{% endif %}
-        <p><strong>{{ kit.status }}</strong>
+        <div class="progress" role="img" aria-label="Progress: {{ kit.status }}">
+            {% for s in statuses[1:] %}<span{% if loop.index <= step %} class="done"{% endif %}></span>{% endfor %}
+        </div>
+        <p class="small"><strong>{{ kit.status }}</strong>{% if kit.finished_on %} on {{ kit.finished_on }}{% endif %}</p>
             {% if kit.finished_on %}<span class="muted small">on {{ kit.finished_on }}</span>{% endif %}</p>
         {% if kit.difficulty or kit.build_quality %}
         <p class="small">
@@ -25,6 +38,10 @@
         <a class="btn btn-secondary" href="{{ url_for('edit_kit', kit_id=kit.id) }}">Edit</a>
     </article>
     {% endfor %}
+</div>
+{% elif search %}
+<div class="card">
+    <p>No kits match "{{ search }}". You don't own it yet.</p>
 </div>
 {% else %}
 <div class="card">
