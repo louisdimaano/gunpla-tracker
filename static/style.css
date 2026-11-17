@@ -70,7 +70,7 @@ body {
 /* Bold slanted titles, like the type on a kit box */
 .site-name,
 h1,
-.kit-card h2,
+.plate h2,
 .tag {
     font-family: "Barlow Condensed", sans-serif;
     font-style: italic;
@@ -181,7 +181,17 @@ h1 {
     clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
 }
 
-.kit-card.is-painted {
+.plate p {
+    margin: 0;
+}
+
+.plate h2 {
+    margin: 0;
+    font-size: 30px;
+    line-height: 1.1;
+}
+
+.plate.is-painted {
     border-left-color: var(--yellow);
 }
 
