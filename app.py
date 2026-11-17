@@ -2,8 +2,7 @@ import os
 from datetime import date
 
 from flask import Flask, render_template, request, redirect, url_for, abort
-
-from db import get_db, init_db
+from db import get_db, init_db, like_pattern
 from kits import GRADES, STATUSES, SORT_OPTIONS, read_kit_form, decide_finished_on, sort_kits
 
 
@@ -48,7 +47,7 @@ def kit_list():
     if search:
         kits = conn.execute(
             "SELECT * FROM kits WHERE name LIKE ? ESCAPE '\\'",
-            (f"%{escape_like(search)}%",),
+             (like_pattern(search),),
         ).fetchall()
     else:
         kits = conn.execute("SELECT * FROM kits").fetchall()

@@ -1,24 +1,10 @@
 from datetime import date
 
+from forms import read_number
+
 GRADES = ["HG", "RG", "MG", "PG", "SD", "EG", "FM", "Other"]
 STATUSES = ["Not Started", "Snapped Fit", "Built", "Painted"]
 FINISHED_STATUSES = ("Built", "Painted")
-
-
-def read_number(text, lowest, highest=None):
-    """Turn form text into a whole number.
-
-    Returns (number, ok). An empty box gives (None, True).
-    """
-    text = text.strip()
-    if not text:
-        return None, True
-    if not text.isdecimal():
-        return None, False
-    number = int(text)
-    if number < lowest or (highest is not None and number > highest):
-        return None, False
-    return number, True
 
 
 def read_kit_form(form):

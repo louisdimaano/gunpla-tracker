@@ -18,3 +18,12 @@ def init_db():
     conn.executescript(schema)
     conn.commit()
     conn.close()
+
+
+def like_pattern(text):
+    """Turn search text into a LIKE pattern that matches it anywhere.
+
+    %, _ and \\ are escaped so they match literally. Use with ESCAPE '\\'.
+    """
+    escaped = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{escaped}%"
