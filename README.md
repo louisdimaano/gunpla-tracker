@@ -4,6 +4,8 @@ A web app I'm building to keep track of everything on my Gunpla bench: the kits 
 
 It uses the same stack as my [SpoolManager](https://github.com/louisdimaano/spool-manager) project.
 
+It runs in Docker on my home server, so I can check it from my phone anywhere over Tailscale.
+
 ## Features
 
 - Add, edit, and delete kits (name, grade, kit number, series, status, difficulty, build quality, notes)
@@ -63,6 +65,26 @@ python app.py
 Then open http://127.0.0.1:5001. The database (`kits.db`) is created automatically on the first run.
 
 > **Note:** there is no login, so only run this on a private network. Don't expose it to the internet.
+
+## Running It with Docker
+
+1. Create a `.env` file next to `compose.yaml` with a random secret key:
+
+   ```
+   SECRET_KEY=your-long-random-string
+   ```
+
+   One way to make one: `python3 -c "import secrets; print(secrets.token_hex(32))"`
+
+2. Build and start it:
+
+   ```
+   docker compose up -d --build
+   ```
+
+3. Open http://localhost:5001 (or your server's address on port 5001).
+
+The database is stored in `./data`, outside the container, so it survives rebuilds. Back up that folder.
 
 ## Running the Tests
 

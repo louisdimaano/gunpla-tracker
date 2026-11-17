@@ -1,0 +1,11 @@
+services:
+  gunpla-tracker:
+    build: .
+    container_name: gunpla-tracker
+    ports:
+      - "5001:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
