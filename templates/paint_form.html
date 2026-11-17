@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ heading }} | Gunpla Tracker{% endblock %}
+
+{% block content %}
+<h1>{{ heading }}</h1>
+
+{% if errors %}
+<div class="errors">
+    {% for error in errors %}
+    <p>{{ error }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" class="card">
+    <p class="field"><label>Paint name
+            <input name="name" value="{{ form.get('name') or '' }}" required placeholder="e.g. Gundam Blue"></label></p>
+
+    <div class="row">
+        <p class="field"><label>Brand (optional)
+                <input name="brand" list="brand-options" autocomplete="off" value="{{ form.get('brand') or '' }}"
+                    placeholder="e.g. Mr. Color"></label></p>
+        <p class="field"><label>Paint code (optional)
+                <input name="code" value="{{ form.get('code') or '' }}" placeholder="e.g. C-5"></label></p>
+    </div>
+    <datalist id="brand-options">
+        {% for b in brand_options %}
+        <option value="{{ b }}">
+            {% endfor %}
+    </datalist>
+
+    <div class="row">
+        <p class="field"><label>Color
+                <input type="color" name="color" value="{{ form.get('color') or '#808080' }}"></label></p>
+        <p class="field"><label>How many you have
+                <input type="number" name="quantity" min="0" step="1"
+                    value="{{ form.get('quantity') if form.get('quantity') is not none else '' }}"></label></p>
+    </div>
+
+    <p class="field"><label class="check">
+            <input type="checkbox" name="running_low" {% if form.get('running_low') %}checked{% endif %}>
+            Running low</label></p>
+
+    <p class="field"><label>Notes (optional)
+            <textarea name="notes"
+                placeholder="e.g. Thin 1:1 for airbrushing">{{ form.get('notes') or '' }}</textarea></label></p>
+
+    <div class="form-actions">
+        <button class="btn" type="submit">Save</button>
+        <a class="btn btn-secondary" href="{{ url_for('paint_list') }}">Cancel</a>
+    </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Paints | Gunpla Tracker{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <h1>My Paints</h1>
+    <a class="btn" href="{{ url_for('add_paint') }}">Add paint</a>
+</div>
+
+<form method="get" class="search-bar">
+    <input type="search" name="q" value="{{ search }}" placeholder="Search paint names or codes"
+        aria-label="Search paint names or codes">
+    {% if show_used_up %}<input type="hidden" name="used_up" value="1">{% endif %}
+    <button class="btn" type="submit">Search</button>
+    {% if search %}<a class="btn btn-secondary" href="{{ url_for('paint_list') }}">Clear</a>{% endif %}
+</form>
+
+{% if paints %}
+<div class="plate-grid">
+    {% for paint in paints %}
+    <article class="plate{% if paint.quantity == 0 %} is-used-up{% elif paint.running_low %} is-low{% endif %}">
+        {% if paint.code %}<span class="tag">{{ paint.code }}</span>{% endif %}
+        <div class="paint-top">
+            <span class="swatch" style="background: {{ paint.color }}"></span>
+            <div>
+                <h2>{{ paint.name }}</h2>
+                {% if paint.brand %}<p class="muted">{{ paint.brand }}</p>{% endif %}
+            </div>
+        </div>
+        <p class="small">
+            {% if paint.quantity == 0 %}<strong>Used up</strong>
+            {% else %}<strong>{{ paint.quantity }} on hand</strong>{% endif %}
+            {% if paint.running_low and paint.quantity > 0 %}<span class="badge">Running low</span>{% endif %}
+        </p>
+        {% if paint.notes %}<p class="small muted">{{ paint.notes }}</p>{% endif %}
+    </article>
+    {% endfor %}
+</div>
+{% elif search %}
+<div class="card">
+    <p>No paints match "{{ search }}". You don't have it on hand.</p>
+</div>
+{% else %}
+<div class="card">
+    <p>No paints yet. <a href="{{ url_for('add_paint') }}">Add your first one.</a></p>
+</div>
+{% endif %}
+
+<p class="small">
+    {% if show_used_up %}
+    <a href="{{ url_for('paint_list', q=search or None) }}">Hide used-up paints</a>
+    {% else %}
+    <a href="{{ url_for('paint_list', q=search or None, used_up=1) }}">Show used-up paints</a>
+    {% endif %}
+</p>
+{% endblock %}

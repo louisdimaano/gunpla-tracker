@@ -165,13 +165,13 @@ h1 {
 }
 
 /* Kit cards, shaped like armor plates with two cut corners */
-.kit-grid {
+.plate-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 16px;
 }
 
-.kit-card {
+.plate {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -204,7 +204,7 @@ h1 {
     clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
 
-.kit-card .btn {
+.plate>.btn {
     margin-top: auto;
     align-self: flex-start;
     padding: 6px 14px;
@@ -355,4 +355,92 @@ textarea:focus {
 
 .errors p {
     margin: 0;
+}
+
+a {
+    color: var(--blue);
+}
+
+/* Page title with an Add button beside it */
+.page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+}
+
+.page-head h1 {
+    margin: 0;
+}
+
+/* Paint and tool cards */
+.plate.is-low {
+    border-left-color: var(--red);
+}
+
+.plate.is-used-up {
+    opacity: 0.6;
+}
+
+.paint-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.swatch {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid var(--frame);
+}
+
+.badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 8px;
+    background: var(--yellow);
+    color: #0b1226;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.plate-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 6px;
+}
+
+.plate-actions form {
+    display: flex;
+    gap: 8px;
+}
+
+.plate-actions .btn {
+    padding: 6px 14px;
+    font-size: 14px;
+}
+
+/* Checkbox with its label on one line */
+label.check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+}
+
+label.check input {
+    margin: 0;
+    width: 20px;
+    height: 20px;
+}
+
+input[type="color"] {
+    height: 46px;
+    padding: 4px;
 }

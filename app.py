@@ -4,6 +4,7 @@ from datetime import date
 from flask import Flask, render_template, request, redirect, url_for, abort
 from db import get_db, init_db, like_pattern
 from kits import GRADES, STATUSES, SORT_OPTIONS, read_kit_form, decide_finished_on, sort_kits
+from paints import read_paint_form
 
 
 app = Flask(__name__)
@@ -118,6 +119,64 @@ def delete_kit(kit_id):
     conn.commit()
     conn.close()
     return redirect(url_for("kit_list"))
+
+# ---------- Paints ----------
+
+def show_paint_form(heading, form, errors, paint_id=None):
+    """Show the Add or Edit paint form, with any errors at the top."""
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT DISTINCT brand FROM paints WHERE brand IS NOT NULL ORDER BY brand COLLATE NOCASE"
+    ).fetchall()
+    conn.close()
+    brand_options = [row["brand"] for row in rows]
+    return render_template("paint_form.html", heading=heading, form=form, errors=errors,
+                           paint_id=paint_id, brand_options=brand_options)
+
+
+@app.route("/paints")
+def paint_list():
+    search = request.args.get("q", "").strip()
+    show_used_up = request.args.get("used_up") == "1"
+
+    conditions = []
+    params = []
+    if search:
+        conditions.append("(name LIKE ? ESCAPE '\\' OR code LIKE ? ESCAPE '\\')")
+        params += [like_pattern(search), like_pattern(search)]
+    if not show_used_up:
+        conditions.append("quantity > 0")
+
+    sql = "SELECT * FROM paints"
+    if conditions:
+        sql += " WHERE " + " AND ".join(conditions)
+    sql += " ORDER BY brand IS NULL, brand COLLATE NOCASE, name COLLATE NOCASE"
+
+    conn = get_db()
+    paints = conn.execute(sql, params).fetchall()
+    conn.close()
+    return render_template("paints.html", paints=paints, search=search,
+                           show_used_up=show_used_up)
+
+
+@app.route("/paints/new", methods=["GET", "POST"])
+def add_paint():
+    if request.method == "GET":
+        return show_paint_form("Add a Paint", {"quantity": 1}, [])
+
+    values, errors = read_paint_form(request.form)
+    if errors:
+        return show_paint_form("Add a Paint", request.form, errors)
+
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO paints (name, brand, code, color, quantity, running_low, notes) "
+        "VALUES (:name, :brand, :code, :color, :quantity, :running_low, :notes)",
+        values,
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for("paint_list"))
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
