@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, abort
 from db import get_db, init_db, like_pattern
 from kits import GRADES, STATUSES, SORT_OPTIONS, read_kit_form, decide_finished_on, sort_kits
 from paints import read_paint_form, change_quantity
+from tools import CATEGORIES, read_tool_form, sort_tools
 
 
 app = Flask(__name__)
@@ -234,6 +235,92 @@ def delete_paint(paint_id):
     conn.commit()
     conn.close()
     return redirect(url_for("paint_list"))
+
+# ---------- Tools ----------
+
+def show_tool_form(heading, form, errors, tool_id=None):
+    """Show the Add or Edit tool form, with any errors at the top."""
+    return render_template("tool_form.html", heading=heading, form=form, errors=errors,
+                           tool_id=tool_id, categories=CATEGORIES)
+
+
+def get_tool_or_404(conn, tool_id):
+    """Find one tool by id, or show a Not Found page."""
+    tool = conn.execute("SELECT * FROM tools WHERE id = ?", (tool_id,)).fetchone()
+    if tool is None:
+        conn.close()
+        abort(404)
+    return tool
+
+
+@app.route("/tools")
+def tool_list():
+    search = request.args.get("q", "").strip()
+
+    conn = get_db()
+    if search:
+        tools = conn.execute(
+            "SELECT * FROM tools WHERE name LIKE ? ESCAPE '\\'", (like_pattern(search),)
+        ).fetchall()
+    else:
+        tools = conn.execute("SELECT * FROM tools").fetchall()
+    conn.close()
+    return render_template("tools.html", tools=sort_tools(tools), search=search)
+
+
+@app.route("/tools/new", methods=["GET", "POST"])
+def add_tool():
+    if request.method == "GET":
+        return show_tool_form("Add a Tool", {}, [])
+
+    values, errors = read_tool_form(request.form)
+    if errors:
+        return show_tool_form("Add a Tool", request.form, errors)
+
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO tools (name, category, runs_out, running_low, notes) "
+        "VALUES (:name, :category, :runs_out, :running_low, :notes)",
+        values,
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for("tool_list"))
+
+
+@app.route("/tools/<int:tool_id>/edit", methods=["GET", "POST"])
+def edit_tool(tool_id):
+    conn = get_db()
+    saved = get_tool_or_404(conn, tool_id)
+
+    if request.method == "GET":
+        conn.close()
+        return show_tool_form("Edit Tool", dict(saved), [], tool_id)
+
+    values, errors = read_tool_form(request.form)
+    if errors:
+        conn.close()
+        return show_tool_form("Edit Tool", request.form, errors, tool_id)
+
+    values["id"] = tool_id
+    conn.execute(
+        "UPDATE tools SET name = :name, category = :category, runs_out = :runs_out, "
+        "running_low = :running_low, notes = :notes WHERE id = :id",
+        values,
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for("tool_list"))
+
+
+@app.route("/tools/<int:tool_id>/delete", methods=["POST"])
+def delete_tool(tool_id):
+    conn = get_db()
+    get_tool_or_404(conn, tool_id)
+    conn.execute("DELETE FROM tools WHERE id = ?", (tool_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("tool_list"))
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

@@ -21,6 +21,8 @@
                     %}aria-current="page" {% endif %}>Kits</a>
                 <a href="{{ url_for('paint_list') }}" {% if request.path.startswith('/paints') %}aria-current="page" {%
                     endif %}>Paints</a>
+                <a href="{{ url_for('tool_list') }}" {% if request.path.startswith('/tools') %}aria-current="page" {%
+                    endif %}>Tools</a>
             </nav>
         </div>
     </header>

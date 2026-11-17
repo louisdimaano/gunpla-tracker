@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Tools | Gunpla Tracker{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <h1>My Tools</h1>
+    <a class="btn" href="{{ url_for('add_tool') }}">Add tool</a>
+</div>
+
+<form method="get" class="search-bar">
+    <input type="search" name="q" value="{{ search }}" placeholder="Search tool names" aria-label="Search tool names">
+    <button class="btn" type="submit">Search</button>
+    {% if search %}<a class="btn btn-secondary" href="{{ url_for('tool_list') }}">Clear</a>{% endif %}
+</form>
+
+{% if tools %}
+<div class="plate-grid">
+    {% for tool in tools %}
+    <article class="plate{% if tool.running_low %} is-low{% endif %}">
+        <span class="tag">{{ tool.category }}</span>
+        <h2>{{ tool.name }}</h2>
+        {% if tool.running_low %}<p><span class="badge">Running low</span></p>{% endif %}
+        {% if tool.notes %}<p class="small muted">{{ tool.notes }}</p>{% endif %}
+        <a class="btn btn-secondary" href="{{ url_for('edit_tool', tool_id=tool.id) }}">Edit</a>
+    </article>
+    {% endfor %}
+</div>
+{% elif search %}
+<div class="card">
+    <p>No tools match "{{ search }}". You don't own it yet.</p>
+</div>
+{% else %}
+<div class="card">
+    <p>No tools yet. <a href="{{ url_for('add_tool') }}">Add your first one.</a></p>
+</div>
+{% endif %}
+{% endblock %}

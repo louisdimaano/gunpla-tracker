@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ heading }} | Gunpla Tracker{% endblock %}
+
+{% block content %}
+<h1>{{ heading }}</h1>
+
+{% if errors %}
+<div class="errors">
+    {% for error in errors %}
+    <p>{{ error }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" class="card">
+    <p class="field"><label>Tool name
+            <input name="name" value="{{ form.get('name') or '' }}" required placeholder="e.g. GodHand SPN-120"></label>
+    </p>
+
+    <p class="field"><label>Category
+            <select name="category">
+                {% for c in categories %}
+                <option value="{{ c }}" {% if form.get('category')==c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select></label></p>
+
+    <p class="field"><label class="check">
+            <input type="checkbox" name="runs_out" {% if form.get('runs_out') %}checked{% endif %}>
+            This runs out (sandpaper, cement, top coat)</label></p>
+    <p class="field"><label class="check">
+            <input type="checkbox" name="running_low" {% if form.get('running_low') %}checked{% endif %}>
+            Running low</label></p>
+    <p class="hint muted small">Running low only counts for things that run out.</p>
+
+    <p class="field"><label>Notes (optional)
+            <textarea name="notes"
+                placeholder="e.g. Leaves stress marks on thick gates">{{ form.get('notes') or '' }}</textarea></label>
+    </p>
+
+    <div class="form-actions">
+        <button class="btn" type="submit">Save</button>
+        <a class="btn btn-secondary" href="{{ url_for('tool_list') }}">Cancel</a>
+    </div>
+</form>
+
+{% if tool_id %}
+<form method="post" class="delete-form" action="{{ url_for('delete_tool', tool_id=tool_id) }}"
+    onsubmit="return confirm('Delete this tool for good?');">
+    <button class="btn btn-danger" type="submit">Delete tool</button>
+</form>
+{% endif %}
+{% endblock %}
