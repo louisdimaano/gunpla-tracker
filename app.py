@@ -4,7 +4,7 @@ from datetime import date
 from flask import Flask, render_template, request, redirect, url_for, abort
 from db import get_db, init_db, like_pattern
 from kits import GRADES, STATUSES, SORT_OPTIONS, read_kit_form, decide_finished_on, sort_kits
-from paints import read_paint_form
+from paints import read_paint_form, change_quantity
 
 
 app = Flask(__name__)
@@ -133,6 +133,14 @@ def show_paint_form(heading, form, errors, paint_id=None):
     return render_template("paint_form.html", heading=heading, form=form, errors=errors,
                            paint_id=paint_id, brand_options=brand_options)
 
+def get_paint_or_404(conn, paint_id):
+    """Find one paint by id, or show a Not Found page."""
+    paint = conn.execute("SELECT * FROM paints WHERE id = ?", (paint_id,)).fetchone()
+    if paint is None:
+        conn.close()
+        abort(404)
+    return paint
+
 
 @app.route("/paints")
 def paint_list():
@@ -174,6 +182,55 @@ def add_paint():
         "VALUES (:name, :brand, :code, :color, :quantity, :running_low, :notes)",
         values,
     )
+    conn.commit()
+    conn.close()
+    return redirect(url_for("paint_list"))
+
+@app.route("/paints/<int:paint_id>/edit", methods=["GET", "POST"])
+def edit_paint(paint_id):
+    conn = get_db()
+    saved = get_paint_or_404(conn, paint_id)
+
+    if request.method == "GET":
+        conn.close()
+        return show_paint_form("Edit Paint", dict(saved), [], paint_id)
+
+    values, errors = read_paint_form(request.form)
+    if errors:
+        conn.close()
+        return show_paint_form("Edit Paint", request.form, errors, paint_id)
+
+    values["id"] = paint_id
+    conn.execute(
+        "UPDATE paints SET name = :name, brand = :brand, code = :code, color = :color, "
+        "quantity = :quantity, running_low = :running_low, notes = :notes WHERE id = :id",
+        values,
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for("paint_list"))
+
+
+@app.route("/paints/<int:paint_id>/adjust", methods=["POST"])
+def adjust_paint(paint_id):
+    change = request.form.get("change")
+    if change not in ("1", "-1"):
+        abort(400)
+
+    conn = get_db()
+    saved = get_paint_or_404(conn, paint_id)
+    new_quantity = change_quantity(saved["quantity"], int(change))
+    conn.execute("UPDATE paints SET quantity = ? WHERE id = ?", (new_quantity, paint_id))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("paint_list", q=request.form.get("q") or None))
+
+
+@app.route("/paints/<int:paint_id>/delete", methods=["POST"])
+def delete_paint(paint_id):
+    conn = get_db()
+    get_paint_or_404(conn, paint_id)
+    conn.execute("DELETE FROM paints WHERE id = ?", (paint_id,))
     conn.commit()
     conn.close()
     return redirect(url_for("paint_list"))

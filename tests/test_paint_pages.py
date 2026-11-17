@@ -64,3 +64,55 @@ def test_paint_form_suggests_existing_brands(client):
 
 def test_menu_links_to_paints(client):
     assert b'href="/paints"' in client.get("/").data
+
+def test_minus_one_never_goes_below_zero(client):
+    add_paint(client, quantity="1")
+    paint_id = only_paint()["id"]
+    client.post(f"/paints/{paint_id}/adjust", data={"change": "-1"})
+    client.post(f"/paints/{paint_id}/adjust", data={"change": "-1"})
+    assert only_paint()["quantity"] == 0
+
+
+def test_plus_one_adds_one(client):
+    add_paint(client, quantity="1")
+    client.post(f"/paints/{only_paint()['id']}/adjust", data={"change": "1"})
+    assert only_paint()["quantity"] == 2
+
+
+def test_adjust_only_accepts_plus_or_minus_one(client):
+    add_paint(client, quantity="1")
+    response = client.post(f"/paints/{only_paint()['id']}/adjust", data={"change": "50"})
+    assert response.status_code == 400
+    assert only_paint()["quantity"] == 1
+
+
+def test_adjust_keeps_the_search(client):
+    add_paint(client)
+    response = client.post(f"/paints/{only_paint()['id']}/adjust", data={"change": "1", "q": "blue"})
+    assert response.headers["Location"].endswith("/paints?q=blue")
+
+
+def test_edit_paint_saves_changes(client):
+    add_paint(client)
+    client.post(f"/paints/{only_paint()['id']}/edit",
+                data={**PAINT, "quantity": "3", "running_low": "on"})
+    assert only_paint()["quantity"] == 3
+    assert only_paint()["running_low"] == 1
+
+
+def test_edit_form_shows_saved_color(client):
+    add_paint(client)
+    assert b'value="#1d4e9e"' in client.get(f"/paints/{only_paint()['id']}/edit").data
+
+
+def test_delete_removes_paint(client):
+    add_paint(client)
+    client.post(f"/paints/{only_paint()['id']}/delete")
+    assert only_paint() is None
+
+
+def test_missing_paint_is_not_found(client):
+    assert client.get("/paints/999/edit").status_code == 404
+    assert client.post("/paints/999/edit", data=PAINT).status_code == 404
+    assert client.post("/paints/999/adjust", data={"change": "1"}).status_code == 404
+    assert client.post("/paints/999/delete").status_code == 404
