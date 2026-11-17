@@ -44,6 +44,7 @@
                     aria-label="One more {{ paint.name }}">+1</button>
             </form>
             <a class="btn btn-secondary" href="{{ url_for('edit_paint', paint_id=paint.id) }}">Edit</a>
+            <a class="btn btn-secondary" href="{{ url_for('shade_paint', paint_id=paint.id) }}">Shade</a>
         </div>
     </article>
     {% endfor %}

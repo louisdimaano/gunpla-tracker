@@ -445,3 +445,64 @@ input[type="color"] {
     height: 46px;
     padding: 4px;
 }
+
+/* Shading mixer */
+.shade-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    text-align: center;
+}
+
+.shade-swatch {
+    display: block;
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 6px;
+    border-radius: 50%;
+    border: 4px solid var(--frame);
+}
+
+.shade-ratio {
+    margin: 16px 0 8px;
+    text-align: center;
+    font-family: "Barlow Condensed", sans-serif;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 28px;
+}
+
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+input[type="range"] {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    accent-color: var(--blue);
+}
+
+.shade-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px;
+}
+
+.shade-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.shade-list .swatch {
+    width: 32px;
+    height: 32px;
+}

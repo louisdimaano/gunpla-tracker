@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Shade {{ paint.name }} | Gunpla Tracker{% endblock %}
+
+{% block content %}
+<h1>Shade {{ paint.name }}</h1>
+
+<div class="card">
+    <div class="shade-compare">
+        <div>
+            <span class="shade-swatch" style="background: {{ paint.color }}"></span>
+            <p class="small muted">Your paint</p>
+        </div>
+        <div>
+            <span class="shade-swatch" id="shade-preview" style="background: {{ steps[start].color }}"></span>
+            <p class="small muted">The mix</p>
+        </div>
+    </div>
+
+    <p class="shade-ratio" id="shade-ratio">{{ steps[start].label }}</p>
+
+    <div class="slider-row">
+        <span class="small">Darker</span>
+        <input type="range" id="shade-slider" min="0" max="{{ steps|length - 1 }}" value="{{ start }}"
+            aria-label="Move left for darker, right for lighter">
+        <span class="small">Lighter</span>
+    </div>
+
+    <p class="muted small">A starting point, not an exact recipe: screens can only estimate real paint.
+        Test the mix on a spoon or a spare part first.</p>
+</div>
+
+<h2>All mixes</h2>
+<ul class="shade-list">
+    {% for step in steps %}
+    <li><span class="swatch" style="background: {{ step.color }}"></span>{{ step.label }}</li>
+    {% endfor %}
+</ul>
+
+<a class="btn btn-secondary" href="{{ url_for('paint_list') }}">Back to paints</a>
+
+<script>
+    const steps = {{ steps | tojson }};
+    const slider = document.getElementById("shade-slider");
+    const preview = document.getElementById("shade-preview");
+    const ratio = document.getElementById("shade-ratio");
+
+    slider.addEventListener("input", () => {
+        const step = steps[slider.value];
+        preview.style.background = step.color;
+        ratio.textContent = step.label;
+    });
+</script>
+{% endblock %}

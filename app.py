@@ -6,6 +6,7 @@ from db import get_db, init_db, like_pattern
 from kits import GRADES, STATUSES, SORT_OPTIONS, read_kit_form, decide_finished_on, sort_kits
 from paints import read_paint_form, change_quantity
 from tools import CATEGORIES, read_tool_form, sort_tools
+from shading import DARKER, shade_steps
 
 
 app = Flask(__name__)
@@ -235,6 +236,14 @@ def delete_paint(paint_id):
     conn.commit()
     conn.close()
     return redirect(url_for("paint_list"))
+
+@app.route("/paints/<int:paint_id>/shade")
+def shade_paint(paint_id):
+    conn = get_db()
+    paint = get_paint_or_404(conn, paint_id)
+    conn.close()
+    return render_template("shade.html", paint=paint, steps=shade_steps(paint["color"]),
+                           start=len(DARKER))
 
 # ---------- Tools ----------
 
