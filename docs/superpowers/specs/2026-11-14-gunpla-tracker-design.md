@@ -111,3 +111,6 @@ Each stage should leave a working app that's useful on its own. Scanning is plac
 - The color math for shading (any reasonable approach that gives whole-number ratios)
 - Which barcode scanning library to use in the browser
 - Repository name (for example `gunpla-tracker`) and the host port
+
+
+**Dropped (Nov 17, 2026):** I'd rather pick what to build freely than follow a plan.

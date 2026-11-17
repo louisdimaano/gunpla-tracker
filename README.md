@@ -113,7 +113,6 @@ Each test gets its own empty database, so running the tests never touches my rea
 ## Roadmap
 
 - Run it in Docker on my home server and reach it from my phone anywhere over Tailscale
-- A "what should I build next" suggestion that follows my plan: HGs first, then alternate RG and HG
 - A shading mixer that gives a mixing ratio for lighter or darker versions of a paint
 - Scan paint barcodes with my phone camera, and remember them for rebuys
 
