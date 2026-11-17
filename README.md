@@ -18,6 +18,7 @@ It runs in Docker on my home server, so I can check it from my phone anywhere ov
 - Paints I've used up are kept, not deleted, and hidden until I ask to see them
 - Tools and supplies inventory, sorted by category, with a "running low" flag for things that run out like sandpaper and cement
 - Works on phones, with light and dark mode
+- A shading mixer for every paint: slide toward darker or lighter and get a mixing ratio with black or white, with a preview that mixes like real pigment
 
 ## Built With
 
@@ -25,6 +26,7 @@ It runs in Docker on my home server, so I can check it from my phone anywhere ov
 - SQLite (Python's built-in sqlite3, no ORM)
 - Jinja templates, HTML, and CSS
 - pytest, including page tests with Flask's test client
+- [Mixbox](https://github.com/scrtwpns/mixbox) for pigment-style color mixing (CC BY-NC 4.0, free for non-commercial use)
 
 ## How the Finished Date Works
 
@@ -44,6 +46,7 @@ gunpla-tracker/
 ├── kits.py             # Kit form checks, the finished-date rule, and sorting
 ├── paints.py           # Paint form checks and the +1/-1 rule
 ├── tools.py            # Tool form checks and sorting
+├── shading.py          # Shading mixer: ratios and pigment-style color mixing
 ├── forms.py            # Small helpers shared by every form
 ├── db.py               # Database connection, setup, and the search helper
 ├── schema.sql          # Database tables
@@ -109,11 +112,12 @@ Each test gets its own empty database, so running the tests never touches my rea
 - Building a SQL query from parts (only the filters that are needed), while every value still goes through `?` placeholders
 - Checking input with a regular expression before it goes into the page, like the paint color in the swatch
 - Adding new tables to an existing database with `CREATE TABLE IF NOT EXISTS`, without touching the data already there
+- Passing data from Python to JavaScript with Jinja's `tojson`, so a slider can update the page without reloading it
+- Keeping the math in Python, where pytest can check it, and letting JavaScript only display the result
+- Checking a library's license before adding it to a project
 
 ## Roadmap
 
-- Run it in Docker on my home server and reach it from my phone anywhere over Tailscale
-- A shading mixer that gives a mixing ratio for lighter or darker versions of a paint
 - Scan paint barcodes with my phone camera, and remember them for rebuys
 
 This is a personal fan project and isn't affiliated with Bandai.
