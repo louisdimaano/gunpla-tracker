@@ -1,6 +1,6 @@
 # Gunpla Tracker
 
-A web app I'm building to keep track of my Gunpla collection. It shows every kit I own and how far along each build is, and I can search it from my phone, like when I'm in a hobby store and can't remember if I already have a kit.
+A web app I'm building to keep track of everything on my Gunpla bench: the kits I own and how far along each build is, plus my paints and tools. I can search it from my phone, like when I'm in a hobby store and can't remember if I already have a kit or a paint.
 
 It uses the same stack as my [SpoolManager](https://github.com/louisdimaano/spool-manager) project.
 
@@ -9,8 +9,12 @@ It uses the same stack as my [SpoolManager](https://github.com/louisdimaano/spoo
 - Add, edit, and delete kits (name, grade, kit number, series, status, difficulty, build quality, notes)
 - Build progress on every kit: Not Started, Snapped Fit, Built, Painted
 - A finished date that fills in by itself when a kit is marked Built or Painted, and can be typed in by hand for kits I finished before I had the app
-- Search by name, and sort by name, grade, series, kit number, or status
+- Search kits by name, and sort them by name, grade, series, kit number, or status
 - Series suggestions while typing, so the same series doesn't get spelled three different ways
+- Paints inventory with a color swatch, brand, paint code, and how many I have on hand
+- Search paints by name or paint code (like "C-5"), with −1 and +1 buttons for when I finish or buy a jar
+- Paints I've used up are kept, not deleted, and hidden until I ask to see them
+- Tools and supplies inventory, sorted by category, with a "running low" flag for things that run out like sandpaper and cement
 - Works on phones, with light and dark mode
 
 ## Built With
@@ -35,9 +39,12 @@ It uses the same stack as my [SpoolManager](https://github.com/louisdimaano/spoo
 ```
 gunpla-tracker/
 ├── app.py              # Routes and page logic
-├── kits.py             # Form checks, the finished-date rule, and sorting
-├── db.py               # Database connection and setup
-├── schema.sql          # Database table
+├── kits.py             # Kit form checks, the finished-date rule, and sorting
+├── paints.py           # Paint form checks and the +1/-1 rule
+├── tools.py            # Tool form checks and sorting
+├── forms.py            # Small helpers shared by every form
+├── db.py               # Database connection, setup, and the search helper
+├── schema.sql          # Database tables
 ├── templates/          # Jinja page templates
 ├── static/style.css    # Styles
 ├── tests/              # pytest tests
@@ -76,10 +83,13 @@ Each test gets its own empty database, so running the tests never touches my rea
 - Sorting with key functions and tuples, and putting missing values last so Python never has to compare a number with `None`
 - Using GET for searches and POST for anything that changes data, so following a link can never delete a kit
 - CSS variables for light and dark mode, and `clip-path` for the cut corners on the cards
+- Refactoring: moving shared helpers into their own files, with the existing tests proving nothing broke
+- Building a SQL query from parts (only the filters that are needed), while every value still goes through `?` placeholders
+- Checking input with a regular expression before it goes into the page, like the paint color in the swatch
+- Adding new tables to an existing database with `CREATE TABLE IF NOT EXISTS`, without touching the data already there
 
 ## Roadmap
 
-- Paints and tools inventory with search
 - Run it in Docker on my home server and reach it from my phone anywhere over Tailscale
 - A "what should I build next" suggestion that follows my plan: HGs first, then alternate RG and HG
 - A shading mixer that gives a mixing ratio for lighter or darker versions of a paint
