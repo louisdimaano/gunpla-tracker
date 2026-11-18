@@ -16,6 +16,7 @@
     <header class="site-header">
         <div class="site-header-inner">
             <a class="site-name" href="{{ url_for('kit_list') }}">Gunpla Tracker</a>
+            {% if session.get('logged_in') %}
             <nav>
                 <a href="{{ url_for('kit_list') }}" {% if request.path=='/' or request.path.startswith('/kits')
                     %}aria-current="page" {% endif %}>Kits</a>
@@ -23,7 +24,12 @@
                     endif %}>Paints</a>
                 <a href="{{ url_for('tool_list') }}" {% if request.path.startswith('/tools') %}aria-current="page" {%
                     endif %}>Tools</a>
+                <a href="{{ url_for('tool_list') }}" ...>Tools</a>
+                <form method="post" action="{{ url_for('logout') }}" class="logout-form">
+                    <button type="submit">Log out</button>
+                </form>
             </nav>
+            {% endif %}
         </div>
     </header>
 

@@ -506,3 +506,44 @@ input[type="range"] {
     width: 32px;
     height: 32px;
 }
+
+/* Login */
+.narrow {
+    max-width: 420px;
+}
+
+.logout-form {
+    display: inline;
+}
+
+.logout-form button {
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--header);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.recovery-code {
+    margin: 16px 0;
+    padding: 12px;
+    text-align: center;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    background: var(--blue-soft);
+}
+
+/* Menu wraps instead of squeezing on narrow phones */
+nav {
+    flex-wrap: wrap;
+}
+
+nav a,
+.logout-form button {
+    white-space: nowrap;
+}

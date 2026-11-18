@@ -1,20 +1,106 @@
 import os
-from datetime import date
+import secrets
+from datetime import date, timedelta
 
-from flask import Flask, render_template, request, redirect, url_for, abort
+from flask import Flask, render_template, request, redirect, url_for, abort, session
+from werkzeug.security import generate_password_hash, check_password_hash
 from db import get_db, init_db, like_pattern
 from kits import GRADES, STATUSES, SORT_OPTIONS, read_kit_form, decide_finished_on, sort_kits
 from paints import read_paint_form, change_quantity
 from tools import CATEGORIES, read_tool_form, sort_tools
 from shading import DARKER, shade_steps
+from auth import read_new_password, new_recovery_code, normalize_code
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-only-not-secret")
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 init_db()
 
 RATINGS = [1, 2, 3, 4, 5]
 
+
+# ---------- Login ----------
+
+OPEN_PAGES = {"login", "setup", "forgot", "static"}
+
+
+def saved_user():
+    """The one account's saved hashes, or None if no password has been set yet."""
+    conn = get_db()
+    row = conn.execute("SELECT * FROM users LIMIT 1").fetchone()
+    conn.close()
+    return row
+
+
+def save_password(password, new_account=False):
+    """Save a password and a fresh recovery code. Returns the code, to show once."""
+    code = new_recovery_code()
+    hashes = (generate_password_hash(password), generate_password_hash(normalize_code(code)))
+    conn = get_db()
+    if new_account:
+        conn.execute("INSERT INTO users (password_hash, recovery_hash) VALUES (?, ?)", hashes)
+    else:
+        conn.execute("UPDATE users SET password_hash = ?, recovery_hash = ?", hashes)
+    conn.commit()
+    conn.close()
+    return code
+
+
+def log_in():
+    """Give this browser a fresh logged-in session that lasts 30 days."""
+    session.clear()
+    session["logged_in"] = True
+    session.permanent = True
+
+
+@app.before_request
+def require_login():
+    if session.get("logged_in") or request.endpoint in OPEN_PAGES:
+        return None
+    if saved_user() is None:
+        return redirect(url_for("setup"))
+    return redirect(url_for("login"))
+
+
+@app.route("/setup", methods=["GET", "POST"])
+def setup():
+    if saved_user() is not None:
+        return redirect(url_for("login"))
+    if request.method == "GET":
+        return render_template("setup.html", errors=[])
+
+    password, errors = read_new_password(request.form)
+    if errors:
+        return render_template("setup.html", errors=errors)
+
+    code = save_password(password, new_account=True)
+    log_in()
+    return render_template("recovery_code.html", code=code)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    user = saved_user()
+    if user is None:
+        return redirect(url_for("setup"))
+    if request.method == "GET":
+        return render_template("login.html", error=None)
+
+    if not check_password_hash(user["password_hash"], request.form.get("password", "")):
+        return render_template("login.html", error="Wrong password.")
+    log_in()
+    return redirect(url_for("kit_list"))
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+# ---------- Kits ----------
 
 def show_kit_form(heading, form, errors, kit_id=None):
     """Show the Add or Edit form, with any errors at the top."""

@@ -30,3 +30,10 @@ CREATE TABLE IF NOT EXISTS tools (
     running_low INTEGER NOT NULL DEFAULT 0,
     notes TEXT
 );
+
+
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    password_hash TEXT NOT NULL,
+    recovery_hash TEXT NOT NULL
+);
