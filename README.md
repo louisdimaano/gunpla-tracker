@@ -17,6 +17,9 @@ It runs in Docker on my home server, so I can check it from my phone anywhere ov
 - Search paints by name or paint code (like "C-5"), with −1 and +1 buttons for when I finish or buy a jar
 - Paints I've used up are kept, not deleted, and hidden until I ask to see them
 - Tools and supplies inventory, sorted by category, with a "running low" flag for things that run out like sandpaper and cement
+- One-password login: set on the first visit, stays logged in for 30 days per device, and the password is stored only as a hash
+- Forgot password with a one-time recovery code, and a Change password page
+- Every form protected against cross-site request forgery (CSRF)
 - Works on phones, with light and dark mode
 - A shading mixer for every paint: slide toward darker or lighter and get a mixing ratio with black or white, with a preview that mixes like real pigment
 
@@ -27,6 +30,7 @@ It runs in Docker on my home server, so I can check it from my phone anywhere ov
 - Jinja templates, HTML, and CSS
 - pytest, including page tests with Flask's test client
 - [Mixbox](https://github.com/scrtwpns/mixbox) for pigment-style color mixing (CC BY-NC 4.0, free for non-commercial use)
+- Flask-WTF for CSRF protection
 
 ## How the Finished Date Works
 
@@ -47,6 +51,7 @@ gunpla-tracker/
 ├── paints.py           # Paint form checks and the +1/-1 rule
 ├── tools.py            # Tool form checks and sorting
 ├── shading.py          # Shading mixer: ratios and pigment-style color mixing
+├── auth.py             # Password and recovery code rules
 ├── forms.py            # Small helpers shared by every form
 ├── db.py               # Database connection, setup, and the search helper
 ├── schema.sql          # Database tables
@@ -62,12 +67,14 @@ gunpla-tracker/
 python -m venv .venv
 .venv\Scripts\Activate.ps1      # Windows (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
+$env:SECRET_KEY = "local-dev-only"    # Windows; keeps you logged in when the app reloads
 python app.py
 ```
 
 Then open http://127.0.0.1:5001. The database (`kits.db`) is created automatically on the first run.
 
-> **Note:** there is no login, so only run this on a private network. Don't expose it to the internet.
+> **Note:** there's a login now, but no HTTPS yet, so only run this on a private network (I use Tailscale). The first visit asks you to set a password and shows a one-time recovery code. If both are ever lost, delete the account and the setup page comes back:
+> `docker compose exec gunpla-tracker python -c "import db; c = db.get_db(); c.execute('DELETE FROM users'); c.commit()"`
 
 ## Running It with Docker
 
@@ -115,7 +122,12 @@ Each test gets its own empty database, so running the tests never touches my rea
 - Passing data from Python to JavaScript with Jinja's `tojson`, so a slider can update the page without reloading it
 - Keeping the math in Python, where pytest can check it, and letting JavaScript only display the result
 - Checking a library's license before adding it to a project
-
+- Storing passwords as salted hashes, and checking a login without ever keeping the password
+- How sessions work: a cookie signed with the secret key, and how an expiry date keeps you logged in
+- Protecting every page at once with `before_request`, instead of adding a check to each route
+- What CSRF is, and stopping it with form tokens plus `SameSite` cookies
+- Using `secrets` instead of `random` for anything security-related
+- Why a reset should check the recovery code before anything else
 ## Roadmap
 
 - Scan paint barcodes with my phone camera, and remember them for rebuys
