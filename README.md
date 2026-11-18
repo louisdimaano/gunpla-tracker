@@ -128,6 +128,9 @@ Each test gets its own empty database, so running the tests never touches my rea
 - What CSRF is, and stopping it with form tokens plus `SameSite` cookies
 - Using `secrets` instead of `random` for anything security-related
 - Why a reset should check the recovery code before anything else
+- Browsers share cookies between every app on the same host, so each app needs its own cookie name
+- Only inputs inside a `<form>` get submitted, and a test should check where the security token sits, not just that it's on the page
+
 ## Roadmap
 
 - Scan paint barcodes with my phone camera, and remember them for rebuys
