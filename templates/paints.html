@@ -37,6 +37,7 @@
 
         <div class="plate-actions">
             <form method="post" action="{{ url_for('adjust_paint', paint_id=paint.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="q" value="{{ search }}">
                 <button class="btn btn-secondary" name="change" value="-1"
                     aria-label="One less {{ paint.name }}">&minus;1</button>

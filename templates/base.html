@@ -24,8 +24,10 @@
                     endif %}>Paints</a>
                 <a href="{{ url_for('tool_list') }}" {% if request.path.startswith('/tools') %}aria-current="page" {%
                     endif %}>Tools</a>
-                <a href="{{ url_for('tool_list') }}" ...>Tools</a>
+                <a href="{{ url_for('account') }}" {% if request.path.startswith('/account') %}aria-current="page" {%
+                    endif %}>Password</a>
                 <form method="post" action="{{ url_for('logout') }}" class="logout-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit">Log out</button>
                 </form>
             </nav>

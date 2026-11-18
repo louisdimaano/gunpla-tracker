@@ -99,3 +99,7 @@ def test_menu_shows_log_out_only_when_logged_in(anon_client):
     assert b"Log out" in anon_client.get("/").data
     anon_client.post("/logout")
     assert b"Log out" not in anon_client.get("/login").data
+
+def test_login_cookie_has_its_own_name(anon_client):
+    response = set_password(anon_client)
+    assert response.headers["Set-Cookie"].startswith("gunpla_session=")

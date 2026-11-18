@@ -3,6 +3,7 @@ import secrets
 from datetime import date, timedelta
 
 from flask import Flask, render_template, request, redirect, url_for, abort, session
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import get_db, init_db, like_pattern
 from kits import GRADES, STATUSES, SORT_OPTIONS, read_kit_form, decide_finished_on, sort_kits
@@ -16,6 +17,9 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_NAME"] = "gunpla_session"
+app.config["WTF_CSRF_TIME_LIMIT"] = None
+csrf = CSRFProtect(app)
 init_db()
 
 RATINGS = [1, 2, 3, 4, 5]
@@ -62,6 +66,11 @@ def require_login():
     if saved_user() is None:
         return redirect(url_for("setup"))
     return redirect(url_for("login"))
+
+
+@app.errorhandler(CSRFError)
+def csrf_failed(error):
+    return render_template("csrf_error.html"), 400
 
 
 @app.route("/setup", methods=["GET", "POST"])

@@ -110,3 +110,9 @@ def test_change_password_page_needs_login(anon_client):
     anon_client.post("/logout")
     response = anon_client.get("/account")
     assert response.headers["Location"].endswith("/login")
+
+def test_menu_links_to_change_password(anon_client):
+    set_password(anon_client)
+    page = anon_client.get("/").data
+    assert b'href="/account"' in page
+    assert b">Password</a>" in page
